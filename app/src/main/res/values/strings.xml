@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">WeatherApp</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">Weather Details</string>
+    <string name="error_app">Something went wrong please try again later</string>
+    <string name="error_connection">Please check your internet connection or try again later</string>
+    <string name="loading">Loading…</string>
+    <string name="no_data_found">No data found</string>
+    <string name="oops">Oops!</string>
+    <string name="retry">Retry</string>
+    <string name="ground">Ground</string>
+    <string name="_100">100</string>
+    <string name="f">°F</string>
+    <string name="sunset">Sunset</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="pressure">Pressure</string>
+    <string name="weather">Weather</string>
+    <string name="feels_like">Feels Like</string>
+    <string name="max_temp">Max Temp</string>
+    <string name="min_temp">Min Temp</string>
+    <string name="time">Time</string>
+    <string name="search_here">Search here…</string>
+    <string name="temp_format">%s %.0f °</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="temp_format_to_int">%s %d °</string>
+    <string name="per">%</string>
+    <string name="wind_speed_format">%.2f m/s</string>
+    <string name="humidity_format">%d %s</string>
+    <string name="sea">Sea</string>
+    <string name="country">Country</string>
+    <string name="please_enter_city_name">Please enter city name</string>
+    <string name="humidity">Humidity</string>
+    <string name="_12">12</string>
+</resources>

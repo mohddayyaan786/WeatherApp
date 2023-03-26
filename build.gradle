@@ -1,0 +1,28 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext {
+        coreKtx = '1.9.0'
+        appCompat = '1.6.1'
+        material = '1.8.0'
+        constraintLayout = '2.1.4'
+        navVersion = '2.5.3'
+        lifecycleVersion = '2.6.1'
+        lifecycleExtension = '2.2.0'
+        daggerHiltVersion = '2.44'
+        retrofitVersion = '2.9.0'
+        okhttp3Version = '5.0.0-alpha.2'
+        glideVersion = '4.12.0'
+        googleLocation = '21.0.1'
+        lottie = '3.7.0'
+        jodaTime = '2.10.3'
+        espressoCore = '3.5.1'
+        junit = '4.13.2'
+        androidJunit = '1.1.5'
+    }
+}
+plugins {
+    id 'com.android.application' version '7.4.0-beta05' apply false
+    id 'com.android.library' version '7.4.0-beta05' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+    id 'com.google.dagger.hilt.android' version '2.44' apply false
+}
