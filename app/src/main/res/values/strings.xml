@@ -34,4 +34,6 @@
     <string name="please_enter_city_name">Please enter city name</string>
     <string name="humidity">Humidity</string>
     <string name="_12">12</string>
+    <string name="city_not_found">city not found</string>
+    <string name="permission_denied">Permission Denied</string>
 </resources>

@@ -12,25 +12,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.weatherapp.R
 import com.weatherapp.databinding.FragmentWeatherBinding
+import com.weatherapp.prefsstore.weather.CityPrefsStoreImpl
 import com.weatherapp.ui.BaseFragment
 import com.weatherapp.ui.weather.data.response.WeatherResponse
 import com.weatherapp.util.APP_ID
-import com.weatherapp.util.LOCATION_REQUEST_CODE
 import com.weatherapp.util.currentDate
 import com.weatherapp.util.extension.*
 import com.weatherapp.util.kelvinToCentigrade
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>() {
-
+    @Inject
+    lateinit var cityPrefsStoreImpl: CityPrefsStoreImpl
     private lateinit var fusedLocationProvider: FusedLocationProviderClient
 
     override val viewModelClass = WeatherViewModel::class.java
@@ -43,21 +46,13 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
         super.onViewCreated(view, savedInstanceState)
         fusedLocationProvider = LocationServices.getFusedLocationProviderClient(requireActivity())
         with(binding) {
-
+            citySearch.setText(cityPrefsStoreImpl.getCity())
             with(viewModel) {
                 uiState().observe(viewLifecycleOwner) { state -> onLoadState(state) }
-                loading.retry {
-                    if (getIsUserSearchedCity() && !TextUtils.isEmpty(citySearch.text.toString())) getCityWeatherInfo(
-                        citySearch.text.toString(),
-                        APP_ID
-                    )
-                    else getCurrentLocation()
-                }
-                getCurrentLocation()
+                getWeatherData()
                 citySearch.onEditorActionListener {
-                    if (!TextUtils.isEmpty(citySearch.text.toString())) getCityWeatherInfo(
-                        this,
-                        APP_ID
+                    if (!TextUtils.isEmpty(citySearch.text.toString().trim())) getCityWeatherInfo(
+                        this, APP_ID
                     )
                     else Toast.makeText(
                         requireContext(),
@@ -68,6 +63,11 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
                 currentLocation.setOnClickListener { getCurrentLocation() }
                 getLocationLiveData().observe(viewLifecycleOwner) {
                     getCurrentWeatherInfo(it.latitude.toString(), it.longitude.toString(), APP_ID)
+                }
+                loading.retry {
+                    citySearch.setText("")
+                    cityPrefsStoreImpl.setCity("")
+                    getWeatherData()
                 }
             }
         }
@@ -82,29 +82,40 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
                         requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    requestPermission()
+                    startLocationPermissionRequest()
                     return
                 }
                 fusedLocationProvider.lastLocation.addOnSuccessListener { location ->
-                        if (location != null) {
-                            viewModel.setLocationLiveData(location)
-                        }
+                    if (location != null) {
+                        viewModel.setLocationLiveData(location)
                     }
+                }
             } else {
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(intent)
             }
         } else {
-            requestPermission()
+            startLocationPermissionRequest()
         }
     }
 
-    private fun requestPermission() {
-        ActivityCompat.requestPermissions(
-            requireActivity(), arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
-            ), LOCATION_REQUEST_CODE
-        )
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // PERMISSION GRANTED
+            getCurrentLocation()
+        } else {
+            // PERMISSION NOT GRANTED
+            Toast.makeText(
+                requireContext(), getString(R.string.permission_denied), Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    // Ex. Launching ACCESS_FINE_LOCATION permission.
+    private fun startLocationPermissionRequest() {
+        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private fun isLocationEnabled(): Boolean {
@@ -127,16 +138,6 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
         return false
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getCurrentLocation()
-            }
-        }
-    }
 
     private fun onLoadState(state: WeatherDataResultState) {
         with(binding) {
@@ -213,7 +214,7 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
                 seaValue.text = main.sea_level.toString()
 
                 countryValue.text = sys.country
-
+                cityPrefsStoreImpl.setCity(name)
                 updateUI(weather[0].id)
             }
         }
@@ -264,6 +265,17 @@ class WeatherFragment : BaseFragment<FragmentWeatherBinding, WeatherViewModel>()
             weatherImg.setImageResource(image)
             mainLayout.background = ContextCompat.getDrawable(requireContext(), background)
             optionsLayout.background = ContextCompat.getDrawable(requireContext(), background)
+        }
+    }
+
+    private fun getWeatherData() {
+        with(binding) {
+            with(viewModel) {
+                if (TextUtils.isEmpty(citySearch.text.toString().trim())) getCurrentLocation()
+                else getCityWeatherInfo(
+                    citySearch.text.toString().trim(), APP_ID
+                )
+            }
         }
     }
 

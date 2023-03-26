@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 fun String.loge(TAG: String = LOG_TAG) = Log.e(TAG, this)
-
 fun String.changeOldTimeFormatToNewTimeFormat(old: String, new: String): String {
     return try {
         val dateFormat = SimpleDateFormat(new, Locale.getDefault())

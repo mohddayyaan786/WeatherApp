@@ -5,7 +5,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import com.weatherapp.util.helper.SingleBlock
-
 fun EditText.onEditorActionListener(onTextChanged: SingleBlock<String>) =
     setOnEditorActionListener { _, actionId, _ ->
         if (actionId == EditorInfo.IME_ACTION_SEARCH) {

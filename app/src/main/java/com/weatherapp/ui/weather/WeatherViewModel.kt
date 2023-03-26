@@ -16,17 +16,17 @@ import javax.inject.Inject
 class WeatherViewModel @Inject constructor(
     private val weatherDataUseCase: WeatherDataUseCaseImpl
 ) : BaseViewModel<WeatherDataResultState>() {
-    private var isUserSearchedCity = false
+
     private val _locationLiveData = MutableLiveData<Location>()
     private val locationLiveData: LiveData<Location> = _locationLiveData
-    fun getIsUserSearchedCity() = this.isUserSearchedCity
+
     fun getLocationLiveData() = this.locationLiveData
     fun setLocationLiveData(location: Location) {
         this._locationLiveData.value = location
     }
 
     fun getCurrentWeatherInfo(lat: String, lot: String, appId: String) {
-        this.isUserSearchedCity = false
+
         viewModelScope.launch {
             uiState.addSourceDisposable(
                 weatherDataUseCase.getCurrentWeatherInfo(lat, lot, appId)
@@ -46,7 +46,7 @@ class WeatherViewModel @Inject constructor(
     }
 
     fun getCityWeatherInfo(city: String, appId: String) {
-        this.isUserSearchedCity = true
+
         viewModelScope.launch {
             uiState.addSourceDisposable(
                 weatherDataUseCase.getCityWeatherInfo(city, appId)
